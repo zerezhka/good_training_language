@@ -118,7 +118,17 @@ const КОМАНДЫ: &[Команда] = &[
 
                 let путь_к_исполняемому = файл_вывода
                     .map(|файл_вывода| PathBuf::from(файл_вывода))
-                    .unwrap_or_else(|| Path::new("./").join(&файл_ввода).with_extension(""));
+                    .unwrap_or_else(||{
+                        // Проверяем, что билд папка ./сборка существует
+                        let папка_сборки = Path::new("./сборка");
+                        if !папка_сборки.exists() {
+                            fs::create_dir_all(папка_сборки).expect("Failed to create build directory");
+                        }
+                        let _имяфайла = &файл_ввода.file_stem().unwrap_or_default();
+                        // билдим в ./сборка/_имяфайла
+                        let output_path = папка_сборки.join(&_имяфайла).with_extension("");
+                        output_path
+                    });
                 фазм::сгенерировать_исполняемый_файл(&путь_к_исполняемому, &программа.пп, точка_входа)?;
 
                 if пуск {
